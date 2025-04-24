@@ -26,6 +26,9 @@ export const formatStyle = () => dedent`
     display: inline;
     vertical-align: middle;
   }
+  .card pre {
+    text-align: left;
+  }
   .cloze {
     font-weight: bold;
     color: blue;

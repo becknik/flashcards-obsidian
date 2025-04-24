@@ -90,7 +90,8 @@ export default class ObsidianFlashcard extends Plugin {
     this.cardsService
       .execute(activeFile)
       .then((res) => {
-        for (const r of res) {
+        // TODO res might be undefined
+        for (const r of res!) {
           new Notice(r, NOTICE_TIMEOUT);
         }
         console.log(res);

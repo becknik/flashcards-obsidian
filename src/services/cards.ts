@@ -35,7 +35,7 @@ export class CardsService {
     this.anki = new Anki();
   }
 
-  public async execute(activeFile: TFile): Promise<string[]> {
+  public async execute(activeFile: TFile): Promise<string[] | undefined> {
     this.regex.update(this.settings);
 
     try {
@@ -53,19 +53,17 @@ export class CardsService {
     const sourcePath = activeFile.path;
     const fileCachedMetadata = this.app.metadataCache.getFileCache(activeFile);
     const vaultName = this.app.vault.getName();
-    let globalTags: string[] = undefined;
+    let globalTags: string[] | undefined = undefined;
 
     // Parse frontmatter
-    const frontmatter = fileCachedMetadata.frontmatter;
+    const frontmatter = fileCachedMetadata?.frontmatter!; // TODO check if frontmatter is undefined
     let deckName = "";
     if (parseFrontMatterEntry(frontmatter, "cards-deck")) {
       deckName = parseFrontMatterEntry(frontmatter, "cards-deck");
-    } else if (
-      this.settings.folderBasedDeck &&
-      activeFile.parent.path !== "/"
-    ) {
+    } else if (this.settings.folderBasedDeck && activeFile.parent?.path !== "/") {
       // If the current file is in the path "programming/java/strings.md" then the deck name is "programming::java"
-      deckName = activeFile.parent.path.split("/").join("::");
+      // TODO parent might be undefined
+      deckName = activeFile.parent!.path.split("/").join("::");
     } else {
       deckName = this.settings.deck;
     }
@@ -178,7 +176,7 @@ export class CardsService {
             sourcePath
           );
           try {
-            const binaryMedia = await this.app.vault.readBinary(image);
+            const binaryMedia = await this.app.vault.readBinary(image!); // TODO image might be undefined
             card.mediaBase64Encoded.push(arrayBufferToBase64(binaryMedia));
           } catch (err) {
             Error("Error: Could not read media");
@@ -192,7 +190,7 @@ export class CardsService {
     cardsToCreate: Card[],
     frontmatter: FrontMatterCache,
     deckName: string
-  ): Promise<number> {
+  ): Promise<number | undefined> {
     if (cardsToCreate.length) {
       let insertedCards = 0;
       try {
@@ -283,7 +281,7 @@ export class CardsService {
     }
   }
 
-  private async updateCardsOnAnki(cards: Card[]): Promise<number> {
+  private async updateCardsOnAnki(cards: Card[]): Promise<number | undefined> {
     if (cards.length) {
       try {
         this.anki.updateCards(cards);
@@ -302,7 +300,7 @@ export class CardsService {
   public async deleteCardsOnAnki(
     cards: number[],
     ankiBlocks: RegExpMatchArray[]
-  ): Promise<number> {
+  ): Promise<number | undefined> {
     if (cards.length) {
       let deletedCards = 0;
       for (const block of ankiBlocks) {
@@ -318,7 +316,8 @@ export class CardsService {
             this.file =
               this.file.substring(0, block["index"]) +
               this.file.substring(
-                block["index"] + block[0].length,
+                // TODO check if the block is indexable with "index"
+                block["index"]! + block[0].length,
                 this.file.length
               );
             this.totalOffset -= block[0].length;
@@ -411,7 +410,7 @@ export class CardsService {
     let globalTags: string[] = [];
 
     const tags = file.match(/(?:cards-)?tags: ?(.*)/im);
-    globalTags = tags ? tags[1].match(this.regex.globalTagsSplitter) : [];
+    globalTags = tags ? tags[1].match(this.regex.globalTagsSplitter)! : [];
 
     if (globalTags) {
       for (let i = 0; i < globalTags.length; i++) {

@@ -8,7 +8,6 @@
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
-    "importHelpers": true,
     "downlevelIteration": true,
     "isolatedModules": true,
     "strictNullChecks": true,

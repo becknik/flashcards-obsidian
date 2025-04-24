@@ -1,5 +1,5 @@
-import { CODE_DECK_EXTENSION, SOURCE_DECK_EXTENSION } from "src/conf/constants";
-import { Card } from "src/entities/card";
+import { CODE_DECK_EXTENSION, SOURCE_DECK_EXTENSION } from 'src/conf/constants';
+import { Card } from 'src/entities/card';
 
 export class Inlinecard extends Card {
   constructor(
@@ -13,7 +13,7 @@ export class Inlinecard extends Card {
     tags: string[] = [],
     inserted = false,
     mediaNames: string[],
-    containsCode: boolean
+    containsCode: boolean,
   ) {
     super(
       id,
@@ -26,13 +26,11 @@ export class Inlinecard extends Card {
       tags,
       inserted,
       mediaNames,
-      containsCode
+      containsCode,
     ); // ! CHANGE []
 
-    this.modelName = this.reversed
-      ? `Obsidian-basic-reversed`
-      : `Obsidian-basic`;
-    if (fields["Source"]) {
+    this.modelName = this.reversed ? `Obsidian-basic-reversed` : `Obsidian-basic`;
+    if (fields['Source']) {
       this.modelName += SOURCE_DECK_EXTENSION;
     }
     if (containsCode) {
@@ -49,7 +47,7 @@ export class Inlinecard extends Card {
     };
 
     if (update) {
-      card["id"] = this.id;
+      card['id'] = this.id;
     }
 
     return card;
@@ -72,6 +70,6 @@ export class Inlinecard extends Card {
   };
 
   public getIdFormat(): string {
-    return "^" + this.id.toString();
+    return '^' + this.id.toString();
   }
 }

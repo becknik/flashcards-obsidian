@@ -1,5 +1,5 @@
-import { CODE_DECK_EXTENSION, SOURCE_DECK_EXTENSION } from "src/conf/constants";
-import { Card } from "src/entities/card";
+import { CODE_DECK_EXTENSION, SOURCE_DECK_EXTENSION } from 'src/conf/constants';
+import { Card } from 'src/entities/card';
 
 export class Clozecard extends Card {
   constructor(
@@ -13,7 +13,7 @@ export class Clozecard extends Card {
     tags: string[] = [],
     inserted = false,
     mediaNames: string[],
-    containsCode: boolean
+    containsCode: boolean,
   ) {
     super(
       id,
@@ -26,10 +26,10 @@ export class Clozecard extends Card {
       tags,
       inserted,
       mediaNames,
-      containsCode
+      containsCode,
     );
     this.modelName = `Obsidian-cloze`;
-    if (fields["Source"]) {
+    if (fields['Source']) {
       this.modelName += SOURCE_DECK_EXTENSION;
     }
     if (containsCode) {
@@ -46,7 +46,7 @@ export class Clozecard extends Card {
     };
 
     if (update) {
-      card["id"] = this.id;
+      card['id'] = this.id;
     }
 
     return card;
@@ -69,6 +69,6 @@ export class Clozecard extends Card {
   };
 
   public getIdFormat(): string {
-    return "\n^" + this.id.toString();
+    return '\n^' + this.id.toString();
   }
 }

@@ -6,24 +6,21 @@ import {
   HIHGLIGHTJS_INIT_BASE64,
   SOURCE_DECK_EXTENSION,
   SOURCE_FIELD,
-} from "src/conf/constants";
-import { Card } from "src/entities/card";
+} from 'src/conf/constants';
+import { Card } from 'src/entities/card';
 
 export class Anki {
-  public async createModels(
-    sourceSupport: boolean,
-    codeHighlightSupport: boolean
-  ) {
+  public async createModels(sourceSupport: boolean, codeHighlightSupport: boolean) {
     let models = this.getModels(sourceSupport, false);
     if (codeHighlightSupport) {
       models = models.concat(this.getModels(sourceSupport, true));
     }
 
-    return this.invoke("multi", 6, { actions: models });
+    return this.invoke('multi', 6, { actions: models });
   }
 
   public async createDeck(deckName: string): Promise<any> {
-    return this.invoke("createDeck", 6, { deck: deckName });
+    return this.invoke('createDeck', 6, { deck: deckName });
   }
 
   public async storeMediaFiles(cards: Card[]) {
@@ -32,47 +29,47 @@ export class Anki {
     for (const card of cards) {
       for (const media of card.getMedias()) {
         actions.push({
-          action: "storeMediaFile",
+          action: 'storeMediaFile',
           params: media,
         });
       }
     }
 
     if (actions) {
-      return this.invoke("multi", 6, { actions: actions });
+      return this.invoke('multi', 6, { actions: actions });
     } else {
       return {};
     }
   }
 
   public async storeCodeHighlightMedias() {
-    const fileExists = await this.invoke("retrieveMediaFile", 6, {
-      filename: "_highlightInit.js",
+    const fileExists = await this.invoke('retrieveMediaFile', 6, {
+      filename: '_highlightInit.js',
     });
 
     if (!fileExists) {
       const highlightjs = {
-        action: "storeMediaFile",
+        action: 'storeMediaFile',
         params: {
-          filename: "_highlight.js",
+          filename: '_highlight.js',
           data: HIGHLIGHTJS_BASE64,
         },
       };
       const highlightjsInit = {
-        action: "storeMediaFile",
+        action: 'storeMediaFile',
         params: {
-          filename: "_highlightInit.js",
+          filename: '_highlightInit.js',
           data: HIHGLIGHTJS_INIT_BASE64,
         },
       };
       const highlightjcss = {
-        action: "storeMediaFile",
+        action: 'storeMediaFile',
         params: {
-          filename: "_highlight.css",
+          filename: '_highlight.css',
           data: HIGHLIGHT_CSS_BASE64,
         },
       };
-      return this.invoke("multi", 6, {
+      return this.invoke('multi', 6, {
         actions: [highlightjs, highlightjsInit, highlightjcss],
       });
     }
@@ -83,7 +80,7 @@ export class Anki {
 
     cards.forEach((card) => notes.push(card.getCard(false)));
 
-    return this.invoke("addNotes", 6, {
+    return this.invoke('addNotes', 6, {
       notes: notes,
     });
   }
@@ -107,51 +104,49 @@ export class Anki {
 
     for (const card of cards) {
       updateActions.push({
-        action: "updateNoteFields",
+        action: 'updateNoteFields',
         params: {
           note: card.getCard(true),
         },
       });
 
-      updateActions = updateActions.concat(
-        this.mergeTags(card.oldTags, card.tags, card.id)
-      );
+      updateActions = updateActions.concat(this.mergeTags(card.oldTags, card.tags, card.id));
       ids.push(card.id);
     }
 
     // Update deck
     updateActions.push({
-      action: "changeDeck",
+      action: 'changeDeck',
       params: {
         cards: ids,
         deck: cards[0].deckName,
       },
     });
 
-    return this.invoke("multi", 6, { actions: updateActions });
+    return this.invoke('multi', 6, { actions: updateActions });
   }
 
   public async changeDeck(ids: number[], deckName: string) {
-    return await this.invoke("changeDeck", 6, {
+    return await this.invoke('changeDeck', 6, {
       cards: ids,
       deck: deckName,
     });
   }
 
   public async cardsInfo(ids: number[]) {
-    return await this.invoke("cardsInfo", 6, { cards: ids });
+    return await this.invoke('cardsInfo', 6, { cards: ids });
   }
 
   public async getCards(ids: number[]) {
-    return await this.invoke("notesInfo", 6, { notes: ids });
+    return await this.invoke('notesInfo', 6, { notes: ids });
   }
 
   public async deleteCards(ids: number[]) {
-    return this.invoke("deleteNotes", 6, { notes: ids });
+    return this.invoke('deleteNotes', 6, { notes: ids });
   }
 
   public async ping(): Promise<boolean> {
-    return (await this.invoke("version", 6)) === 6;
+    return (await this.invoke('version', 6)) === 6;
   }
 
   private mergeTags(oldTags: string[], newTags: string[], cardId: number) {
@@ -164,7 +159,7 @@ export class Anki {
         oldTags.splice(index, 1);
       } else {
         actions.push({
-          action: "addTags",
+          action: 'addTags',
           params: {
             notes: [cardId],
             tags: tag,
@@ -176,7 +171,7 @@ export class Anki {
     // All Tags to delete
     for (const tag of oldTags) {
       actions.push({
-        action: "removeTags",
+        action: 'removeTags',
         params: {
           notes: [cardId],
           tags: tag,
@@ -190,18 +185,18 @@ export class Anki {
   private invoke(action: string, version = 6, params = {}): any {
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
-      xhr.addEventListener("error", () => reject("failed to issue request"));
-      xhr.addEventListener("load", () => {
+      xhr.addEventListener('error', () => reject('failed to issue request'));
+      xhr.addEventListener('load', () => {
         try {
           const response = JSON.parse(xhr.responseText);
           if (Object.getOwnPropertyNames(response).length != 2) {
-            throw "response has an unexpected number of fields";
+            throw 'response has an unexpected number of fields';
           }
-          if (!Object.prototype.hasOwnProperty.call(response, "error")) {
-            throw "response is missing required error field";
+          if (!Object.prototype.hasOwnProperty.call(response, 'error')) {
+            throw 'response is missing required error field';
           }
-          if (!Object.prototype.hasOwnProperty.call(response, "result")) {
-            throw "response is missing required result field";
+          if (!Object.prototype.hasOwnProperty.call(response, 'result')) {
+            throw 'response is missing required result field';
           }
           if (response.error) {
             throw response.error;
@@ -212,26 +207,23 @@ export class Anki {
         }
       });
 
-      xhr.open("POST", "http://127.0.0.1:8765");
+      xhr.open('POST', 'http://127.0.0.1:8765');
       xhr.send(JSON.stringify({ action, version, params }));
     });
   }
 
-  private getModels(
-    sourceSupport: boolean,
-    codeHighlightSupport: boolean
-  ): object[] {
-    let sourceFieldContent = "";
-    let codeScriptContent = "";
-    let sourceExtension = "";
-    let codeExtension = "";
+  private getModels(sourceSupport: boolean, codeHighlightSupport: boolean): object[] {
+    let sourceFieldContent = '';
+    let codeScriptContent = '';
+    let sourceExtension = '';
+    let codeExtension = '';
     if (sourceSupport) {
-      sourceFieldContent = "\r\n" + SOURCE_FIELD;
+      sourceFieldContent = '\r\n' + SOURCE_FIELD;
       sourceExtension = SOURCE_DECK_EXTENSION;
     }
 
     if (codeHighlightSupport) {
-      codeScriptContent = "\r\n" + CODE_SCRIPT + "\r\n";
+      codeScriptContent = '\r\n' + CODE_SCRIPT + '\r\n';
       codeExtension = CODE_DECK_EXTENSION;
     }
 
@@ -246,24 +238,24 @@ export class Anki {
     const clozeFront = `{{cloze:Text}}\n\n<script>\r\n    var tagEl = document.querySelector(\'.tags\');\r\n    var tags = tagEl.innerHTML.split(\' \');\r\n    var html = \'\';\r\n    tags.forEach(function(tag) {\r\n\tif (tag) {\r\n\t    var newTag = \'<span class=\"tag\">\' + tag + \'<\/span>\';\r\n           html += newTag;\r\n    \t    tagEl.innerHTML = html;\r\n\t}\r\n    });\r\n    \r\n<\/script>${codeScriptContent}`;
     const clozeBack = `{{cloze:Text}}\n\n<br>{{Extra}}${sourceFieldContent}<script>\r\n    var tagEl = document.querySelector(\'.tags\');\r\n    var tags = tagEl.innerHTML.split(\' \');\r\n    var html = \'\';\r\n    tags.forEach(function(tag) {\r\n\tif (tag) {\r\n\t    var newTag = \'<span class=\"tag\">\' + tag + \'<\/span>\';\r\n           html += newTag;\r\n    \t    tagEl.innerHTML = html;\r\n\t}\r\n    });\r\n    \r\n<\/script>${codeScriptContent}`;
 
-    let classicFields = ["Front", "Back"];
-    let promptFields = ["Prompt"];
-    let clozeFields = ["Text", "Extra"];
+    let classicFields = ['Front', 'Back'];
+    let promptFields = ['Prompt'];
+    let clozeFields = ['Text', 'Extra'];
     if (sourceSupport) {
-      classicFields = classicFields.concat("Source");
-      promptFields = promptFields.concat("Source");
-      clozeFields = clozeFields.concat("Source");
+      classicFields = classicFields.concat('Source');
+      promptFields = promptFields.concat('Source');
+      clozeFields = clozeFields.concat('Source');
     }
 
     const obsidianBasic = {
-      action: "createModel",
+      action: 'createModel',
       params: {
         modelName: `Obsidian-basic${sourceExtension}${codeExtension}`,
         inOrderFields: classicFields,
         css: css,
         cardTemplates: [
           {
-            Name: "Front / Back",
+            Name: 'Front / Back',
             Front: front,
             Back: back,
           },
@@ -272,19 +264,19 @@ export class Anki {
     };
 
     const obsidianBasicReversed = {
-      action: "createModel",
+      action: 'createModel',
       params: {
         modelName: `Obsidian-basic-reversed${sourceExtension}${codeExtension}`,
         inOrderFields: classicFields,
         css: css,
         cardTemplates: [
           {
-            Name: "Front / Back",
+            Name: 'Front / Back',
             Front: front,
             Back: back,
           },
           {
-            Name: "Back / Front",
+            Name: 'Back / Front',
             Front: frontReversed,
             Back: backReversed,
           },
@@ -293,7 +285,7 @@ export class Anki {
     };
 
     const obsidianCloze = {
-      action: "createModel",
+      action: 'createModel',
       params: {
         modelName: `Obsidian-cloze${sourceExtension}${codeExtension}`,
         inOrderFields: clozeFields,
@@ -301,7 +293,7 @@ export class Anki {
         isCloze: true,
         cardTemplates: [
           {
-            Name: "Cloze",
+            Name: 'Cloze',
             Front: clozeFront,
             Back: clozeBack,
           },
@@ -310,14 +302,14 @@ export class Anki {
     };
 
     const obsidianSpaced = {
-      action: "createModel",
+      action: 'createModel',
       params: {
         modelName: `Obsidian-spaced${sourceExtension}${codeExtension}`,
         inOrderFields: promptFields,
         css: css,
         cardTemplates: [
           {
-            Name: "Spaced",
+            Name: 'Spaced',
             Front: prompt,
             Back: promptBack,
           },
@@ -325,15 +317,10 @@ export class Anki {
       },
     };
 
-    return [
-      obsidianBasic,
-      obsidianBasicReversed,
-      obsidianCloze,
-      obsidianSpaced,
-    ];
+    return [obsidianBasic, obsidianBasicReversed, obsidianCloze, obsidianSpaced];
   }
 
   public async requestPermission() {
-    return this.invoke("requestPermission", 6);
+    return this.invoke('requestPermission', 6);
   }
 }

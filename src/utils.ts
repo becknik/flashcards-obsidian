@@ -1,5 +1,5 @@
 export function arrayBufferToBase64(buffer: ArrayBuffer): string {
-  let binary = "";
+  let binary = '';
   const bytes = new Uint8Array(buffer);
   const len = bytes.byteLength;
   for (let i = 0; i < len; i++) {
@@ -25,27 +25,24 @@ export function arraysEqual(a: string[], b: string[]) {
 export function escapeMarkdown(string: string, skips: string[] = []) {
   const replacements: any = [
     // [/\*/g, "\\*", "asterisks"],
-    [/#/g, "#", "number signs"],
+    [/#/g, '#', 'number signs'],
     // [/\//g, "\\/", "slashes"],
-    [/\\/g, "\\\\", "backslash"],
-    [/\(/g, "\\(", "parentheses"],
-    [/\)/g, "\\)", "parentheses"],
-    [/\[/g, "\\[", "square brackets"],
-    [/\]/g, "\\]", "square brackets"],
-    [/</g, "&lt;", "angle brackets"],
-    [/>/g, "&gt;", "angle brackets"],
-    [/_/g, "\\_", "underscores"],
+    [/\\/g, '\\\\', 'backslash'],
+    [/\(/g, '\\(', 'parentheses'],
+    [/\)/g, '\\)', 'parentheses'],
+    [/\[/g, '\\[', 'square brackets'],
+    [/\]/g, '\\]', 'square brackets'],
+    [/</g, '&lt;', 'angle brackets'],
+    [/>/g, '&gt;', 'angle brackets'],
+    [/_/g, '\\_', 'underscores'],
   ];
 
   return replacements.reduce(function (s: string, replacement: any) {
     const name = replacement[2];
-    return name && skips.indexOf(name) !== -1
-      ? s
-      : s.replace(replacement[0], replacement[1]);
+    return name && skips.indexOf(name) !== -1 ? s : s.replace(replacement[0], replacement[1]);
   }, string);
 }
 
-
-  export function escapeRegExp(str: string) {
-    return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); // $& means the whole matched string
-  }
+export function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); // $& means the whole matched string
+}

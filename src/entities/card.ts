@@ -1,5 +1,5 @@
-import { CODE_DECK_EXTENSION } from "src/conf/constants";
-import { arraysEqual } from "src/utils";
+import { CODE_DECK_EXTENSION } from 'src/conf/constants';
+import { arraysEqual } from 'src/utils';
 
 export abstract class Card {
   id: number | null;
@@ -28,7 +28,7 @@ export abstract class Card {
     tags: string[],
     inserted: boolean,
     mediaNames: string[],
-    containsCode = false
+    containsCode = false,
   ) {
     this.id = id;
     this.deckName = deckName;
@@ -43,7 +43,7 @@ export abstract class Card {
     this.mediaBase64Encoded = [];
     this.oldTags = [];
     this.containsCode = containsCode;
-    this.modelName = "";
+    this.modelName = '';
   }
 
   abstract toString(): string;
@@ -74,6 +74,6 @@ export abstract class Card {
   }
 
   getCodeDeckNameExtension() {
-    return this.containsCode ? CODE_DECK_EXTENSION : "";
+    return this.containsCode ? CODE_DECK_EXTENSION : '';
   }
 }

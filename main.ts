@@ -1,23 +1,23 @@
-import Icon from "assets/icon.svg";
-import { addIcon, Notice, Plugin, TFile } from "obsidian";
-import { NOTICE_TIMEOUT } from "src/conf/constants";
-import { SettingsTab } from "src/gui/settings-tab";
-import { Anki } from "src/services/anki";
-import { CardsService } from "src/services/cards";
-import { Settings } from "src/types/settings";
+import Icon from 'assets/icon.svg';
+import { addIcon, Notice, Plugin, TFile } from 'obsidian';
+import { NOTICE_TIMEOUT } from 'src/conf/constants';
+import { SettingsTab } from 'src/gui/settings-tab';
+import { Anki } from 'src/services/anki';
+import { CardsService } from 'src/services/cards';
+import { Settings } from 'src/types/settings';
 
 const DEFAULT_SETTINGS: Settings = {
   contextAwareMode: true,
   sourceSupport: false,
   codeHighlightSupport: false,
   inlineID: false,
-  contextSeparator: " > ",
-  deck: "Default",
+  contextSeparator: ' > ',
+  deck: 'Default',
   folderBasedDeck: true,
-  flashcardsTag: "card",
-  inlineSeparator: "::",
-  inlineSeparatorReverse: ":::",
-  defaultAnkiTag: "obsidian",
+  flashcardsTag: 'card',
+  inlineSeparator: '::',
+  inlineSeparatorReverse: ':::',
+  defaultAnkiTag: 'obsidian',
   ankiConnectPermission: false,
 } as const;
 
@@ -28,7 +28,7 @@ export default class ObsidianFlashcard extends Plugin {
   async onload() {
     await this.loadSettings();
 
-    addIcon("flashcards", Icon);
+    addIcon('flashcards', Icon);
 
     // TODO test when file did not insert flashcards, but one of them is in Anki already
     const anki = new Anki();
@@ -37,8 +37,8 @@ export default class ObsidianFlashcard extends Plugin {
     const statusBar = this.addStatusBarItem();
 
     this.addCommand({
-      id: "generate-flashcard-current-file",
-      name: "Generate for current file",
+      id: 'generate-flashcard-current-file',
+      name: 'Generate for current file',
       checkCallback: (checking: boolean) => {
         const activeFile = this.app.workspace.getActiveFile();
         if (!activeFile) return false;
@@ -50,12 +50,12 @@ export default class ObsidianFlashcard extends Plugin {
       },
     });
 
-    this.addRibbonIcon("flashcards", "Generate flashcards", () => {
+    this.addRibbonIcon('flashcards', 'Generate flashcards', () => {
       const activeFile = this.app.workspace.getActiveFile();
       if (activeFile) {
         this.generateCards(activeFile);
       } else {
-        new Notice("Open a file before");
+        new Notice('Open a file before');
       }
     });
 
@@ -66,11 +66,11 @@ export default class ObsidianFlashcard extends Plugin {
         () =>
           anki
             .ping()
-            .then(() => statusBar.setText("Anki Active ⚡️"))
-            .catch(() => statusBar.setText("Anki Connection Failed ❌")),
+            .then(() => statusBar.setText('Anki Active ⚡️'))
+            .catch(() => statusBar.setText('Anki Connection Failed ❌')),
         // TODO has this to be so low?? Might this be the reason for the Anki syslog spamming?
-        15 * 1000
-      )
+        15 * 1000,
+      ),
     );
   }
 

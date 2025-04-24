@@ -1,4 +1,4 @@
-import { Settings } from "src/types/settings";
+import { Settings } from 'src/types/settings';
 
 export class Regex {
   headingsRegex: RegExp;
@@ -33,13 +33,10 @@ export class Regex {
     this.headingsRegex = /^ {0,3}(#{1,6}) +([^\n]+?) ?((?: *#\S+)*) *$/gim;
 
     // Supported images https://publish.obsidian.md/help/How+to/Embed+files
-    this.wikiImageLinks =
-      /!\[\[(.*\.(?:png|jpg|jpeg|gif|bmp|svg|tiff)).*?\]\]/gim;
-    this.markdownImageLinks =
-      /!\[\]\((.*\.(?:png|jpg|jpeg|gif|bmp|svg|tiff)).*?\)/gim;
+    this.wikiImageLinks = /!\[\[(.*\.(?:png|jpg|jpeg|gif|bmp|svg|tiff)).*?\]\]/gim;
+    this.markdownImageLinks = /!\[\]\((.*\.(?:png|jpg|jpeg|gif|bmp|svg|tiff)).*?\)/gim;
 
-    this.wikiAudioLinks =
-      /!\[\[(.*\.(?:mp3|webm|wav|m4a|ogg|3gp|flac)).*?\]\]/gim;
+    this.wikiAudioLinks = /!\[\[(.*\.(?:mp3|webm|wav|m4a|ogg|3gp|flac)).*?\]\]/gim;
 
     // https://regex101.com/r/eqnJeW/1
     this.obsidianCodeBlock = /(?:```(?:.*?\n?)+?```)(?:\n|$)/gim;
@@ -53,17 +50,16 @@ export class Regex {
     this.cardsToDelete = /^\s*(?:\n)(?:\^(\d{13}))(?:\n\s*?)?/gm;
 
     // https://regex101.com/r/WxuFI2/1
-    this.globalTagsSplitter =
-      /\[\[(.*?)\]\]|#([\p{L}\d:\-_/]+)|([\p{L}\d:\-_/]+)/gimu;
+    this.globalTagsSplitter = /\[\[(.*?)\]\]|#([\p{L}\d:\-_/]+)|([\p{L}\d:\-_/]+)/gimu;
     this.tagHierarchy = /\//gm;
 
     // Cards
-    const flags = "gimu";
+    const flags = 'gimu';
     // https://regex101.com/r/p3yQwY/2
     let str =
-      "( {0,3}[#]*)((?:[^\\n]\\n?)+?)(#" +
+      '( {0,3}[#]*)((?:[^\\n]\\n?)+?)(#' +
       settings.flashcardsTag +
-      "(?:[/-]reverse)?)((?: *#[\\p{Number}\\p{Letter}\\-\\/_]+)*) *?\\n+((?:[^\\n]\\n?)*?(?=\\^\\d{13}|$))(?:\\^(\\d{13}))?";
+      '(?:[/-]reverse)?)((?: *#[\\p{Number}\\p{Letter}\\-\\/_]+)*) *?\\n+((?:[^\\n]\\n?)*?(?=\\^\\d{13}|$))(?:\\^(\\d{13}))?';
     this.flashscardsWithTag = new RegExp(str, flags);
 
     // https://regex101.com/r/8wmOo8/1
@@ -79,32 +75,32 @@ export class Regex {
     // sepShortest is the shortest
     if (settings.inlineID) {
       str =
-        "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(" +
+        '( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(' +
         sepLongest +
-        "|" +
+        '|' +
         sepShortest +
-        ") ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+)?(?:\\s+\\^(\\d{13})|$)";
+        ') ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+)?(?:\\s+\\^(\\d{13})|$)';
     } else {
       str =
-        "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(" +
+        '( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(' +
         sepLongest +
-        "|" +
+        '|' +
         sepShortest +
-        ") ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+|$)(?:\\n\\^(\\d{13}))?";
+        ') ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+|$)(?:\\n\\^(\\d{13}))?';
     }
     this.cardsInlineStyle = new RegExp(str, flags);
 
     // https://regex101.com/r/HOXF5E/1
     str =
-      "( {0,3}[#]*)((?:[^\\n]\\n?)+?)(#" +
+      '( {0,3}[#]*)((?:[^\\n]\\n?)+?)(#' +
       settings.flashcardsTag +
-      "[/-]spaced)((?: *#[\\p{Letter}-]+)*) *\\n?(?:\\^(\\d{13}))?";
+      '[/-]spaced)((?: *#[\\p{Letter}-]+)*) *\\n?(?:\\^(\\d{13}))?';
     this.cardsSpacedStyle = new RegExp(str, flags);
 
     // https://regex101.com/r/cgtnLf/1
 
     str =
-      "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.*?(==.+?==|\\{.+?\\}).*?)((?: *#[\\w\\-\\/_]+)+|$)(?:\n\\^(\\d{13}))?";
+      '( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.*?(==.+?==|\\{.+?\\}).*?)((?: *#[\\w\\-\\/_]+)+|$)(?:\n\\^(\\d{13}))?';
     this.cardsClozeWholeLine = new RegExp(str, flags);
 
     this.singleClozeCurly = /((?:{)(?:(\d):?)?(.+?)(?:}))/g;

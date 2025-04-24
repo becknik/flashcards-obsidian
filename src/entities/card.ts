@@ -2,7 +2,7 @@ import { CODE_DECK_EXTENSION } from "src/conf/constants";
 import { arraysEqual } from "src/utils";
 
 export abstract class Card {
-  id: number;
+  id: number | null;
   deckName: string;
   initialContent: string;
   fields: Record<string, string>;

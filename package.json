@@ -32,6 +32,7 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
+    "dedent": "^1.5.3",
     "showdown": "^2.1.0"
   }
 }

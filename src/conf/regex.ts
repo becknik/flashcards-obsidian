@@ -1,4 +1,4 @@
-import { ISettings } from "src/conf/settings";
+import { Settings } from "src/types/settings";
 
 export class Regex {
   headingsRegex: RegExp;
@@ -24,11 +24,11 @@ export class Regex {
 
   embedBlock: RegExp;
 
-  constructor(settings: ISettings) {
+  constructor(settings: Settings) {
     this.update(settings);
   }
 
-  public update(settings: ISettings) {
+  public update(settings: Settings) {
     // https://regex101.com/r/BOieWh/1
     this.headingsRegex = /^ {0,3}(#{1,6}) +([^\n]+?) ?((?: *#\S+)*) *$/gim;
 
@@ -67,16 +67,30 @@ export class Regex {
     this.flashscardsWithTag = new RegExp(str, flags);
 
     // https://regex101.com/r/8wmOo8/1
-    const sepLongest = settings.inlineSeparator.length >= settings.inlineSeparatorReverse.length ? settings.inlineSeparator : settings.inlineSeparatorReverse;
-    const sepShortest = settings.inlineSeparator.length < settings.inlineSeparatorReverse.length ? settings.inlineSeparator : settings.inlineSeparatorReverse;
+    const sepLongest =
+      settings.inlineSeparator.length >= settings.inlineSeparatorReverse.length
+        ? settings.inlineSeparator
+        : settings.inlineSeparatorReverse;
+    const sepShortest =
+      settings.inlineSeparator.length < settings.inlineSeparatorReverse.length
+        ? settings.inlineSeparator
+        : settings.inlineSeparatorReverse;
     // sepLongest is the longest between the inlineSeparator and the inlineSeparatorReverse because if the order is ::|::: then always the first will be matched
     // sepShortest is the shortest
     if (settings.inlineID) {
       str =
-        "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(" + sepLongest + "|" + sepShortest + ") ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+)?(?:\\s+\\^(\\d{13})|$)";
+        "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(" +
+        sepLongest +
+        "|" +
+        sepShortest +
+        ") ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+)?(?:\\s+\\^(\\d{13})|$)";
     } else {
       str =
-        "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(" + sepLongest + "|" + sepShortest + ") ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+|$)(?:\\n\\^(\\d{13}))?";
+        "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.+?) ?(" +
+        sepLongest +
+        "|" +
+        sepShortest +
+        ") ?(.+?)((?: *#[\\p{Letter}\\-\\/_]+)+|$)(?:\\n\\^(\\d{13}))?";
     }
     this.cardsInlineStyle = new RegExp(str, flags);
 
@@ -89,13 +103,15 @@ export class Regex {
 
     // https://regex101.com/r/cgtnLf/1
 
-    str = "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.*?(==.+?==|\\{.+?\\}).*?)((?: *#[\\w\\-\\/_]+)+|$)(?:\n\\^(\\d{13}))?"
+    str =
+      "( {0,3}[#]{0,6})?(?:(?:[\\t ]*)(?:\\d.|[-+*]|#{1,6}))?(.*?(==.+?==|\\{.+?\\}).*?)((?: *#[\\w\\-\\/_]+)+|$)(?:\n\\^(\\d{13}))?";
     this.cardsClozeWholeLine = new RegExp(str, flags);
-    
+
     this.singleClozeCurly = /((?:{)(?:(\d):?)?(.+?)(?:}))/g;
     this.singleClozeHighlight = /((?:==)(.+?)(?:==))/g;
 
     // Matches any embedded block but the one with an used extension from the wikilinks
-    this.embedBlock = /!\[\[(.*?)(?<!\.(?:png|jpg|jpeg|gif|bmp|svg|tiff|mp3|webm|wav|m4a|ogg|3gp|flac))\]\]/g;
+    this.embedBlock =
+      /!\[\[(.*?)(?<!\.(?:png|jpg|jpeg|gif|bmp|svg|tiff|mp3|webm|wav|m4a|ogg|3gp|flac))\]\]/g;
   }
 }

@@ -37,7 +37,7 @@ export class SettingsTab extends PluginSettingTab {
           });
         });
       });
-  
+
 
     new Setting(containerEl)
       .setName("Test Anki")
@@ -50,7 +50,7 @@ export class SettingsTab extends PluginSettingTab {
             .catch(() => new Notice("Anki is not connected"));
         });
       });
-  
+
     containerEl.createEl("h2", { text: "General" });
 
     new Setting(containerEl)

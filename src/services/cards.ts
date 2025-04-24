@@ -1,4 +1,3 @@
-import { Anki } from "src/services/anki";
 import {
   App,
   FileSystemAdapter,
@@ -7,17 +6,18 @@ import {
   parseFrontMatterEntry,
   TFile,
 } from "obsidian";
-import { Parser } from "src/services/parser";
-import { ISettings } from "src/conf/settings";
-import { Card } from "src/entities/card";
-import { arrayBufferToBase64 } from "src/utils";
+import { NOTICE_TIMEOUT } from "src/conf/constants";
 import { Regex } from "src/conf/regex";
-import { noticeTimeout } from "src/conf/constants";
+import { Card } from "src/entities/card";
 import { Inlinecard } from "src/entities/inlinecard";
+import { Anki } from "src/services/anki";
+import { Parser } from "src/services/parser";
+import { Settings } from "src/types/settings";
+import { arrayBufferToBase64 } from "src/utils";
 
 export class CardsService {
   private app: App;
-  private settings: ISettings;
+  private settings: Settings;
   private regex: Regex;
   private parser: Parser;
   private anki: Anki;
@@ -27,7 +27,7 @@ export class CardsService {
   private file: string;
   private notifications: string[];
 
-  constructor(app: App, settings: ISettings) {
+  constructor(app: App, settings: Settings) {
     this.app = app;
     this.settings = settings;
     this.regex = new Regex(this.settings);
@@ -60,7 +60,10 @@ export class CardsService {
     let deckName = "";
     if (parseFrontMatterEntry(frontmatter, "cards-deck")) {
       deckName = parseFrontMatterEntry(frontmatter, "cards-deck");
-    } else if (this.settings.folderBasedDeck && activeFile.parent.path !== "/") {
+    } else if (
+      this.settings.folderBasedDeck &&
+      activeFile.parent.path !== "/"
+    ) {
       // If the current file is in the path "programming/java/strings.md" then the deck name is "programming::java"
       deckName = activeFile.parent.path.split("/").join("::");
     } else {
@@ -204,7 +207,7 @@ export class CardsService {
           if (card.id === null) {
             new Notice(
               `Error, could not add: '${card.initialContent}'`,
-              noticeTimeout
+              NOTICE_TIMEOUT
             );
           } else {
             card.reversed ? (insertedCards += 2) : insertedCards++;

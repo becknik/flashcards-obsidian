@@ -3,8 +3,8 @@
   "name": "Flashcards",
   "version": "1.6.5",
   "minAppVersion": "0.9.17",
-  "description": "Anki integration",
-  "author": "Alex Colucci",
-  "authorUrl": "https://github.com/reuseman",
+  "description": "Flashcard generation and sync with Anki Desktop via AnkiConnect",
+  "author": "Alex Colucci, Jannik Becker",
+  "authorUrl": "https://github.com/becknik",
   "isDesktopOnly": true
 }

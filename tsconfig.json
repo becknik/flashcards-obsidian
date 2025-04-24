@@ -1,25 +1,19 @@
-{ 
+{
   "compilerOptions": {
     "baseUrl": ".",
     "inlineSourceMap": true,
     "inlineSources": true,
     "module": "ESNext",
-    "target": "es5",
+    "target": "ES2022",
     "allowJs": true,
     "noImplicitAny": true,
     "moduleResolution": "node",
     "importHelpers": true,
     "downlevelIteration": true,
-    "lib": [
-      "dom",
-      "es5",
-      "scripthost",
-      "es2015",
-      "ES2020.String"
-      
-    ],
+    "isolatedModules": true,
+    "strictNullChecks": true,
+    "lib": ["DOM", "ES2023"],
+    "typeRoots": ["./node_modules/@types", "./src/types"]
   },
-  "include": [
-    "**/*.ts", "jest.config.js",
-  ]
+  "include": ["**/*.ts", "jest.config.js"]
 }

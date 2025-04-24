@@ -1,20 +1,18 @@
-import { ISettings } from "src/conf/settings";
 import * as showdown from "showdown";
 import { Regex } from "src/conf/regex";
-import { Flashcard } from "../entities/flashcard";
+import { Clozecard } from "src/entities/clozecard";
 import { Inlinecard } from "src/entities/inlinecard";
 import { Spacedcard } from "src/entities/spacedcard";
-import { Clozecard } from "src/entities/clozecard";
+import { Settings } from "src/types/settings";
 import { escapeMarkdown } from "src/utils";
-import { Card } from "src/entities/card";
-import { htmlToMarkdown } from 'obsidian';
+import { Flashcard } from "../entities/flashcard";
 
 export class Parser {
   private regex: Regex;
-  private settings: ISettings;
+  private settings: Settings;
   private htmlConverter;
 
-  constructor(regex: Regex, settings: ISettings) {
+  constructor(regex: Regex, settings: Settings) {
     this.regex = regex;
     this.settings = settings;
     this.htmlConverter = new showdown.Converter();
@@ -62,13 +60,14 @@ export class Parser {
     const mathBlocks = [...file.matchAll(this.regex.mathBlock)];
     const mathInline = [...file.matchAll(this.regex.mathInline)];
     const blocksToFilter = [...codeBlocks, ...mathBlocks, ...mathInline];
-    const rangesToDiscard = blocksToFilter.map(x => ([x.index, x.index + x[0].length]))
-    cards = cards.filter(card => {
+    const rangesToDiscard = blocksToFilter.map((x) => [
+      x.index,
+      x.index + x[0].length,
+    ]);
+    cards = cards.filter((card) => {
       const cardRange = [card.initialOffset, card.endOffset];
-      const isInRangeToDiscard = rangesToDiscard.some(range => {
-        return (
-          cardRange[0] >= range[0] && cardRange[1] <= range[1]
-        );
+      const isInRangeToDiscard = rangesToDiscard.some((range) => {
+        return cardRange[0] >= range[0] && cardRange[1] <= range[1];
       });
       return !isInRangeToDiscard;
     });
@@ -160,8 +159,8 @@ export class Parser {
       const originalPrompt = match[2].trim();
       let prompt = contextAware
         ? [...context, match[2].trim()].join(
-          `${this.settings.contextSeparator}`
-        )
+            `${this.settings.contextSeparator}`
+          )
         : match[2].trim();
       let medias: string[] = this.getImageLinks(prompt);
       medias = medias.concat(this.getAudioLinks(prompt));
@@ -212,7 +211,10 @@ export class Parser {
     const mathBlocks = [...file.matchAll(this.regex.mathBlock)];
     const mathInline = [...file.matchAll(this.regex.mathInline)];
     const blocksToFilter = [...mathBlocks, ...mathInline];
-    const rangesToDiscard = blocksToFilter.map(x => ([x.index, x.index + x[0].length]))
+    const rangesToDiscard = blocksToFilter.map((x) => [
+      x.index,
+      x.index + x[0].length,
+    ]);
 
     for (const match of matches) {
       const reversed = false;
@@ -230,22 +232,31 @@ export class Parser {
       const curlyClozes = match[2].matchAll(this.regex.singleClozeCurly);
       const matchIndex = match.index;
       // Identify curly clozes, drop all the ones that are in math blocks i.e. ($\frac{1}{12}$) and substitute the others with Anki syntax
-      let clozeText = match[2].replace(this.regex.singleClozeCurly, (match, g1, g2, g3, offset) => {
-        const globalOffset = matchIndex + offset;
-        const isInMathBlock = rangesToDiscard.some(x => (globalOffset >= x[0] && globalOffset + match[0].length <= x[1]));
-        if (isInMathBlock) {
-          return match;
-        } else {
-          if (g2) {
-            return `{{c${g2}::${g3}}}`;
+      let clozeText = match[2].replace(
+        this.regex.singleClozeCurly,
+        (match, g1, g2, g3, offset) => {
+          const globalOffset = matchIndex + offset;
+          const isInMathBlock = rangesToDiscard.some(
+            (x) =>
+              globalOffset >= x[0] && globalOffset + match[0].length <= x[1]
+          );
+          if (isInMathBlock) {
+            return match;
           } else {
-            return `{{c1::${g3}}}`;
+            if (g2) {
+              return `{{c${g2}::${g3}}}`;
+            } else {
+              return `{{c1::${g3}}}`;
+            }
           }
         }
-      });
+      );
 
       // Replace the highlight clozes in the line with Anki syntax
-      clozeText = clozeText.replace(this.regex.singleClozeHighlight, "{{c1::$2}}");
+      clozeText = clozeText.replace(
+        this.regex.singleClozeHighlight,
+        "{{c1::$2}}"
+      );
 
       if (clozeText === match[2]) {
         // If the clozeText is the same as the match it means that the curly clozes were all in math blocks
@@ -256,8 +267,8 @@ export class Parser {
       // Add context
       clozeText = contextAware
         ? [...context, clozeText.trim()].join(
-          `${this.settings.contextSeparator}`
-        )
+            `${this.settings.contextSeparator}`
+          )
         : clozeText.trim();
       let medias: string[] = this.getImageLinks(clozeText);
       medias = medias.concat(this.getAudioLinks(clozeText));
@@ -313,7 +324,8 @@ export class Parser {
         continue;
       }
 
-      const reversed: boolean = match[3] === this.settings.inlineSeparatorReverse;
+      const reversed: boolean =
+        match[3] === this.settings.inlineSeparatorReverse;
       let headingLevel = -1;
       if (match[1]) {
         headingLevel =
@@ -327,8 +339,8 @@ export class Parser {
       const originalQuestion = match[2].trim();
       let question = contextAware
         ? [...context, match[2].trim()].join(
-          `${this.settings.contextSeparator}`
-        )
+            `${this.settings.contextSeparator}`
+          )
         : match[2].trim();
       let answer = match[4].trim();
       let medias: string[] = this.getImageLinks(question);
@@ -337,7 +349,7 @@ export class Parser {
       question = this.parseLine(question, vault);
       answer = this.parseLine(answer, vault);
 
-      const initialOffset = match.index
+      const initialOffset = match.index;
       const endingLine = match.index + match[0].length;
       const tags: string[] = this.parseTags(match[5], globalTags);
       const id: number = match[6] ? Number(match[6]) : -1;
@@ -384,9 +396,9 @@ export class Parser {
     for (const match of matches) {
       const reversed: boolean =
         match[3].trim().toLowerCase() ===
-        `#${this.settings.flashcardsTag}-reverse` ||
+          `#${this.settings.flashcardsTag}-reverse` ||
         match[3].trim().toLowerCase() ===
-        `#${this.settings.flashcardsTag}/reverse`;
+          `#${this.settings.flashcardsTag}/reverse`;
       const headingLevel = match[1].trim().length !== 0 ? match[1].length : -1;
       // Match.index - 1 because otherwise in the context there will be even match[1], i.e. the question itself
       const context = contextAware
@@ -396,8 +408,8 @@ export class Parser {
       const originalQuestion = match[2].trim();
       let question = contextAware
         ? [...context, match[2].trim()].join(
-          `${this.settings.contextSeparator}`
-        )
+            `${this.settings.contextSeparator}`
+          )
         : match[2].trim();
       let answer = match[5].trim();
       let medias: string[] = this.getImageLinks(question);
@@ -409,7 +421,7 @@ export class Parser {
       question = this.parseLine(question, vault);
       answer = this.parseLine(answer, vault);
 
-      const initialOffset = match.index
+      const initialOffset = match.index;
       const endingLine = match.index + match[0].length;
       const tags: string[] = this.parseTags(match[4], globalTags);
       const id: number = match[6] ? Number(match[6]) : -1;
@@ -551,17 +563,19 @@ export class Parser {
   }
 
   private getEmbedMap() {
-
-    // key：link url 
+    // key：link url
     // value： embed content parse from html document
-    const embedMap = new Map()
+    const embedMap = new Map();
 
-    var embedList = Array.from(document.documentElement.getElementsByClassName('internal-embed'));
-
+    var embedList = Array.from(
+      document.documentElement.getElementsByClassName("internal-embed")
+    );
 
     Array.from(embedList).forEach((el) => {
       // markdown-embed-content markdown-embed-page
-      var embedValue = this.htmlConverter.makeMarkdown(this.htmlConverter.makeHtml(el.outerHTML).toString());
+      var embedValue = this.htmlConverter.makeMarkdown(
+        this.htmlConverter.makeHtml(el.outerHTML).toString()
+      );
 
       var embedKey = el.getAttribute("src");
       embedMap.set(embedKey, embedValue);
@@ -573,14 +587,16 @@ export class Parser {
     return embedMap;
   }
 
-  private getEmbedWrapContent(embedMap: Map<any, any>, embedContent: string): string {
+  private getEmbedWrapContent(
+    embedMap: Map<any, any>,
+    embedContent: string
+  ): string {
     var result = embedContent.match(this.regex.embedBlock);
-    while (result = this.regex.embedBlock.exec(embedContent)) {
+    while ((result = this.regex.embedBlock.exec(embedContent))) {
       // console.log("result[0]: " + result[0]);
       // console.log("embedMap.get(result[1]): " + embedMap.get(result[1]));
       embedContent = embedContent.concat(embedMap.get(result[1]));
     }
     return embedContent;
   }
-
 }

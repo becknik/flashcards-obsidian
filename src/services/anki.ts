@@ -1,13 +1,13 @@
-import { Card } from "src/entities/card";
 import {
-  sourceField,
-  codeScript,
-  highlightjsBase64,
-  hihglightjsInitBase64,
-  highlightCssBase64,
-  codeDeckExtension,
-  sourceDeckExtension,
+  CODE_DECK_EXTENSION,
+  CODE_SCRIPT,
+  HIGHLIGHT_CSS_BASE64,
+  HIGHLIGHTJS_BASE64,
+  HIHGLIGHTJS_INIT_BASE64,
+  SOURCE_DECK_EXTENSION,
+  SOURCE_FIELD,
 } from "src/conf/constants";
+import { Card } from "src/entities/card";
 
 export class Anki {
   public async createModels(
@@ -55,21 +55,21 @@ export class Anki {
         action: "storeMediaFile",
         params: {
           filename: "_highlight.js",
-          data: highlightjsBase64,
+          data: HIGHLIGHTJS_BASE64,
         },
       };
       const highlightjsInit = {
         action: "storeMediaFile",
         params: {
           filename: "_highlightInit.js",
-          data: hihglightjsInitBase64,
+          data: HIHGLIGHTJS_INIT_BASE64,
         },
       };
       const highlightjcss = {
         action: "storeMediaFile",
         params: {
           filename: "_highlight.css",
-          data: highlightCssBase64,
+          data: HIGHLIGHT_CSS_BASE64,
         },
       };
       return this.invoke("multi", 6, {
@@ -132,7 +132,10 @@ export class Anki {
   }
 
   public async changeDeck(ids: number[], deckName: string) {
-    return await this.invoke("changeDeck", 6, { cards: ids, deck: deckName });
+    return await this.invoke("changeDeck", 6, {
+      cards: ids,
+      deck: deckName,
+    });
   }
 
   public async cardsInfo(ids: number[]) {
@@ -223,13 +226,13 @@ export class Anki {
     let sourceExtension = "";
     let codeExtension = "";
     if (sourceSupport) {
-      sourceFieldContent = "\r\n" + sourceField;
-      sourceExtension = sourceDeckExtension;
+      sourceFieldContent = "\r\n" + SOURCE_FIELD;
+      sourceExtension = SOURCE_DECK_EXTENSION;
     }
 
     if (codeHighlightSupport) {
-      codeScriptContent = "\r\n" + codeScript + "\r\n";
-      codeExtension = codeDeckExtension;
+      codeScriptContent = "\r\n" + CODE_SCRIPT + "\r\n";
+      codeExtension = CODE_DECK_EXTENSION;
     }
 
     const css =
@@ -304,8 +307,7 @@ export class Anki {
           },
         ],
       },
-      
-    }
+    };
 
     const obsidianSpaced = {
       action: "createModel",
@@ -323,7 +325,12 @@ export class Anki {
       },
     };
 
-    return [obsidianBasic, obsidianBasicReversed, obsidianCloze, obsidianSpaced];
+    return [
+      obsidianBasic,
+      obsidianBasicReversed,
+      obsidianCloze,
+      obsidianSpaced,
+    ];
   }
 
   public async requestPermission() {

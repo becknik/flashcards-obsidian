@@ -1,71 +1,102 @@
-import { addIcon, Notice, Plugin, TFile } from 'obsidian';
-import { ISettings } from 'src/conf/settings';
-import { SettingsTab } from 'src/gui/settings-tab';
-import { CardsService } from 'src/services/cards';
-import { Anki } from 'src/services/anki';
-import { noticeTimeout, flashcardsIcon } from 'src/conf/constants';
+import Icon from "assets/icon.svg";
+import { addIcon, Notice, Plugin, TFile } from "obsidian";
+import { NOTICE_TIMEOUT } from "src/conf/constants";
+import { SettingsTab } from "src/gui/settings-tab";
+import { Anki } from "src/services/anki";
+import { CardsService } from "src/services/cards";
+import { Settings } from "src/types/settings";
+
+const DEFAULT_SETTINGS: Settings = {
+  contextAwareMode: true,
+  sourceSupport: false,
+  codeHighlightSupport: false,
+  inlineID: false,
+  contextSeparator: " > ",
+  deck: "Default",
+  folderBasedDeck: true,
+  flashcardsTag: "card",
+  inlineSeparator: "::",
+  inlineSeparatorReverse: ":::",
+  defaultAnkiTag: "obsidian",
+  ankiConnectPermission: false,
+} as const;
 
 export default class ObsidianFlashcard extends Plugin {
-	private settings: ISettings
-	private cardsService: CardsService
+  private settings: Settings;
+  private cardsService: CardsService;
 
-	async onload() {
-		addIcon("flashcards", flashcardsIcon)
+  async onload() {
+    await this.loadSettings();
 
-		// TODO test when file did not insert flashcards, but one of them is in Anki already
-		const anki = new Anki()
-		this.settings = await this.loadData() || this.getDefaultSettings()
-		this.cardsService = new CardsService(this.app, this.settings)
+    addIcon("flashcards", Icon);
 
-		const statusBar = this.addStatusBarItem()
+    // TODO test when file did not insert flashcards, but one of them is in Anki already
+    const anki = new Anki();
+    this.cardsService = new CardsService(this.app, this.settings);
 
-		this.addCommand({
-			id: 'generate-flashcard-current-file',
-			name: 'Generate for the current file',
-			checkCallback: (checking: boolean) => {
-				const activeFile = this.app.workspace.getActiveFile()
-				if (activeFile) {
-					if (!checking) {
-						this.generateCards(activeFile)
-					}
-					return true;
-				}
-				return false;
-			}
-		});
+    const statusBar = this.addStatusBarItem();
 
-		this.addRibbonIcon('flashcards', 'Generate flashcards', () => {
-			const activeFile = this.app.workspace.getActiveFile()
-			if (activeFile) {
-				this.generateCards(activeFile)
-			} else {
-				new Notice("Open a file before")
-			}
-		});
+    this.addCommand({
+      id: "generate-flashcard-current-file",
+      name: "Generate for current file",
+      checkCallback: (checking: boolean) => {
+        const activeFile = this.app.workspace.getActiveFile();
+        if (!activeFile) return false;
 
-		this.addSettingTab(new SettingsTab(this.app, this));
+        if (!checking) {
+          this.generateCards(activeFile);
+        }
+        return true;
+      },
+    });
 
-		this.registerInterval(window.setInterval(() =>
-			anki.ping().then(() => statusBar.setText('Anki ⚡️')).catch(() => statusBar.setText('')), 15 * 1000
-		));
-	}
+    this.addRibbonIcon("flashcards", "Generate flashcards", () => {
+      const activeFile = this.app.workspace.getActiveFile();
+      if (activeFile) {
+        this.generateCards(activeFile);
+      } else {
+        new Notice("Open a file before");
+      }
+    });
 
-	async onunload() {
-		await this.saveData(this.settings);
-	}
+    this.addSettingTab(new SettingsTab(this.app, this));
 
-	private getDefaultSettings(): ISettings {
-		return { contextAwareMode: true, sourceSupport: false, codeHighlightSupport: false, inlineID: false, contextSeparator: " > ", deck: "Default", folderBasedDeck: true, flashcardsTag: "card", inlineSeparator: "::", inlineSeparatorReverse: ":::", defaultAnkiTag: "obsidian", ankiConnectPermission: false }
-	}
+    this.registerInterval(
+      window.setInterval(
+        () =>
+          anki
+            .ping()
+            .then(() => statusBar.setText("Anki Active ⚡️"))
+            .catch(() => statusBar.setText("Anki Connection Failed ❌")),
+        // TODO has this to be so low?? Might this be the reason for the Anki syslog spamming?
+        15 * 1000
+      )
+    );
+  }
 
-	private generateCards(activeFile: TFile) {
-		this.cardsService.execute(activeFile).then(res => {
-			for (const r of res) {
-				new Notice(r, noticeTimeout)
-			}
-			console.log(res)
-		}).catch(err => {
-			Error(err)
-		})
-	}
+  onunload() {
+    this.saveData(this.settings);
+  }
+
+  async loadSettings() {
+    this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+  }
+
+  async saveSettings() {
+    await this.saveData(this.settings);
+  }
+
+  private generateCards(activeFile: TFile) {
+    this.cardsService
+      .execute(activeFile)
+      .then((res) => {
+        for (const r of res) {
+          new Notice(r, NOTICE_TIMEOUT);
+        }
+        console.log(res);
+      })
+      .catch((err) => {
+        Error(err);
+      });
+  }
 }

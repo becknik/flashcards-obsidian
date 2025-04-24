@@ -1,4 +1,4 @@
-import { codeDeckExtension } from "src/conf/constants";
+import { CODE_DECK_EXTENSION } from "src/conf/constants";
 import { arraysEqual } from "src/utils";
 
 export abstract class Card {
@@ -35,7 +35,7 @@ export abstract class Card {
     this.initialContent = initialContent;
     this.fields = fields;
     this.reversed = reversed;
-    this.initialOffset = initialOffset
+    this.initialOffset = initialOffset;
     this.endOffset = endOffset;
     this.tags = tags;
     this.inserted = inserted;
@@ -57,7 +57,7 @@ export abstract class Card {
     //     return false
     // }
 
-    const fields : any = Object.entries(card.fields);
+    const fields: any = Object.entries(card.fields);
     // This is the case of a switch from a model to another one. It cannot be handeled
     if (fields.length !== Object.entries(this.fields).length) {
       return true;
@@ -74,6 +74,6 @@ export abstract class Card {
   }
 
   getCodeDeckNameExtension() {
-    return this.containsCode ? codeDeckExtension : "";
+    return this.containsCode ? CODE_DECK_EXTENSION : "";
   }
 }

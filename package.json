@@ -18,6 +18,7 @@
     "@eslint/js": "^9.25.1",
     "@types/jest": "^29.2.0",
     "@types/node": "^20.14.8",
+    "@types/showdown": "^2.0.6",
     "@typescript-eslint/eslint-plugin": "^8.31.0",
     "@typescript-eslint/parser": "^8.31.0",
     "builtin-modules": "^5.0.0",
@@ -31,7 +32,6 @@
     "typescript": "^5.8.3"
   },
   "dependencies": {
-    "@types/showdown": "^1.9.3",
-    "showdown": "^1.9.1"
+    "showdown": "^2.1.0"
   }
 }

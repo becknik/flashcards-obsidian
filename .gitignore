@@ -188,3 +188,4 @@ test/vault-default/.obsidian/*.json
 
 # obsidian
 /main.js
+/data.json

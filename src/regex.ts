@@ -39,7 +39,7 @@ const inlineFirst = /(?<inlineFirst>.+?)/;
 const inlineSeparator = (longer: string, shorter: string) =>
   re`(?<inlineSeparator>${longer}|${shorter})`;
 // match lazily until \n, #, ^
-const inlineSecond = /(?<inlineSecond>[^\n#^]+?)/;
+const inlineSecond = /(?<inlineSecond>[^\n]+?)/;
 // NOTE: for valid Markdown tag, a space before the '^' is necessary
 const idTagInline = re`(?: ${ankiIdTag}|$)`;
 

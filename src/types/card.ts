@@ -11,7 +11,6 @@ export type AnkiFields = {
 export type SourceFieldContext = {
   vaultName: string;
   filePath: string;
-  noteId?: number;
 };
 
 /**

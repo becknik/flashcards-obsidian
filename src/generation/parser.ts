@@ -482,10 +482,8 @@ export class Parser implements ParserProps {
       if (!isFlashcard) continue;
 
       const headingLevelCount = headingLevel?.length ?? 0;
-      const idParsed = id ? Number(id.substring(1)) : null;
       const { mediaLinks, fields, sourceFieldContext, deckName, contextTags } =
         await this.parseCardContent({
-          id: idParsed,
           startIndex,
           questionRaw: heading,
           answerRaw: content,
@@ -499,6 +497,7 @@ export class Parser implements ParserProps {
         ...tagsParsed,
       ];
 
+      const idParsed = id ? Number(id.substring(1)) : null;
       const card = new Flashcard({
         id: idParsed,
         deckName: deckName ?? this.config.deckName,
@@ -545,10 +544,8 @@ export class Parser implements ParserProps {
       // MODIFIED: Check separator first, then combine with tag-based reversed flag
       const isReversed = inlineSeparator === this.settings.inlineSeparatorReversed || hasReverseTag;
 
-      const idParsed = id ? Number(id.substring(1)) : null;
       const { mediaLinks, fields, sourceFieldContext, deckName, contextTags } =
         await this.parseCardContent({
-          id: idParsed,
           startIndex,
           questionRaw: inlineFirst,
           answerRaw: inlineSecond,
@@ -577,6 +574,7 @@ export class Parser implements ParserProps {
         }
       }
 
+      const idParsed = id ? Number(id.substring(1)) : null;
       const tagsComposed = [
         ...(this.settings.defaultAnkiTag ? [this.settings.defaultAnkiTag] : []),
         ...tagsParsed,
@@ -666,14 +664,12 @@ export class Parser implements ParserProps {
    * Raw property arguments are not trimmed yet
    */
   private async parseCardContent({
-    id,
     questionRaw,
     answerRaw,
     headingLevelCount,
     startIndex,
     isReversed = false,
   }: {
-    id: number | null;
     questionRaw: string;
     answerRaw: string;
     headingLevelCount: number | false;
@@ -726,10 +722,6 @@ export class Parser implements ParserProps {
         vaultName: this.vaultName,
         filePath: this.file.path,
       };
-
-      if (id) {
-        sourceFieldContext.noteId = id;
-      }
     }
     return {
       mediaLinks,
@@ -945,7 +937,7 @@ export class Parser implements ParserProps {
       this.substituteMathJax(substitutedNoteLinks);
 
     const parse = inline ? marked.parseInline : marked.parse;
-    const html = (await parse(minusMathJaxContent))
+    const html = await parse(minusMathJaxContent);
 
     const htmlPlusMathJaxContent = this.reinsertMathJax(html, mathJaxContentMap);
     return htmlPlusMathJaxContent;

@@ -86,8 +86,8 @@ export abstract class Card<T extends AnkiFields = AnkiFields> {
       const filePathEncoded = encodeURIComponent(this.sourceFieldContext.filePath);
 
       let source = `obsidian://open?vault=${vaultName}&amp;file=${filePathEncoded}`;
-      if (this.sourceFieldContext.noteId) {
-        source += encodeURIComponent(`#^${this.sourceFieldContext.noteId}`);
+      if (this.id) {
+        source += encodeURIComponent(`#^${this.id}`);
       }
 
       const fileWithEnding =

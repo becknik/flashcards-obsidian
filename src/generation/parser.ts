@@ -419,8 +419,9 @@ export class Parser implements ParserProps {
           '" in file: ' +
           this.file.path,
       });
-
-      if (replace && typeof replace === 'string') headingReplacement = replace;
+    }
+    if (replace && typeof replace === 'string') {
+      headingReplacement = replace;
     }
 
     return { headingReplacement, settings };

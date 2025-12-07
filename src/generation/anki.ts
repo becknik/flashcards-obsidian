@@ -108,6 +108,29 @@ export class AnkiConnection {
   public static async updateModels() {
     const modelsForCreation = AnkiConnection.getModels();
 
+    // MIGRATION: add Context field to old note models if not present on the default one
+    const addContextField = modelsForCreation.map((model) => {
+      const {
+        params: { modelName },
+      } = model;
+
+      return {
+        action: 'modelFieldAdd',
+        params: {
+          modelName: modelName,
+          fieldName: 'Context',
+        },
+      };
+    });
+    const basicFields = await AnkiConnection.invoke<string[]>('modelFieldNames', {
+      modelName: 'Obsidian-basic',
+    });
+    if (!basicFields.contains('Context')) {
+      await AnkiConnection.invoke<string[]>('multi', {
+        actions: addContextField,
+      });
+    }
+
     const updateStylingActions = modelsForCreation.map((model) => {
       const {
         params: { modelName, css },
@@ -129,6 +152,7 @@ export class AnkiConnection {
       const {
         params: { modelName, cardTemplates },
       } = model;
+
       const templates = cardTemplates.map(({ Name, ...other }) => ({
         [Name]: other,
       }));
@@ -144,6 +168,7 @@ export class AnkiConnection {
         },
       }));
     });
+
     await AnkiConnection.invoke('multi', {
       actions: [...updateTemplateActions, ...updateStylingActions],
     });
@@ -451,10 +476,10 @@ export class AnkiConnection {
           inOrderFields: fields,
           isCloze,
           css: AnkiConnection.cssContent!.trimEnd(),
-          cardTemplates: cardTemplates.map((template) => ({
-            Name: template.Name,
-            Front: template.Front + '\n\n' + scriptBlock,
-            Back: template.Back,
+          cardTemplates: cardTemplates.map(({ Name, Front, Back }) => ({
+            Name: Name,
+            Front: Front + '\n\n' + scriptBlock,
+            Back: Back,
           })),
         },
       };
@@ -476,12 +501,12 @@ export class AnkiConnection {
 
     const basic = makeModel({
       name: 'basic',
-      fields: ['Front', 'Back'],
+      fields: ['Front', 'Back', 'Context'],
       cardTemplates: [{ Name: 'Front / Back', ...CARD_TEMPLATES['basic'] }],
     });
     const reversed = makeModel({
       name: 'basic-and-reversed',
-      fields: ['Front', 'Back'],
+      fields: ['Front', 'Back', 'Context'],
       cardTemplates: [
         { Name: 'Front / Back', ...CARD_TEMPLATES['basic'] },
         { Name: 'Back / Front', ...CARD_TEMPLATES['reversed'] },
@@ -489,13 +514,13 @@ export class AnkiConnection {
     });
     const cloze = makeModel({
       name: 'cloze',
-      fields: ['Text', 'Extra'],
+      fields: ['Text', 'Extra', 'Context'],
       isCloze: true,
       cardTemplates: [{ Name: 'Cloze', ...CARD_TEMPLATES['cloze'] }],
     });
     const spaced = makeModel({
       name: 'memo',
-      fields: ['Prompt'],
+      fields: ['Context', 'Prompt'],
       cardTemplates: [{ Name: 'Memo', ...CARD_TEMPLATES['memo'] }],
     });
 

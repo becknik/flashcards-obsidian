@@ -27,11 +27,8 @@ export interface Settings {
   pathBasedDeckGlobal: boolean;
   applyFrontmatterTagsGlobal: boolean;
   applyHeadingContextTagsGlobal: boolean;
-  headingContextModeGlobal:
-    | false
-    | {
-        separator: string;
-      };
+  headingContextModeGlobal: boolean;
+  headingContextSeparator: string;
 
   // # AnkiConnect settings
   transferMediaFiles: boolean;

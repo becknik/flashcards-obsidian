@@ -1,9 +1,13 @@
 .card {
   font-family: arial;
-  font-size: 20px;
+  font-size: 2rem;
   text-align: center;
   color: black;
   background-color: white;
+}
+
+.context {
+  font-size: 1.5rem;
 }
 
 .tag::before {
@@ -15,7 +19,7 @@
   color: white;
   background-color: #9f2bff;
   border: none;
-  font-size: 11px;
+  font-size: 1rem;
   font-weight: bold;
   padding: 1px 8px;
   margin: 0px 3px;
@@ -46,5 +50,9 @@
 
 .source-section {
   font-size: 1rem;
-  color: gray;
+
+  & > summary {
+    color: gray;
+    display: inline-block;
+  }
 }

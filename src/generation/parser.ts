@@ -11,7 +11,6 @@ import {
 } from 'obsidian';
 import { codeToHtml } from 'shiki';
 import * as SparkMD5 from 'spark-md5';
-import { DEFAULT_SETTINGS } from 'src/constants';
 import { Clozecard } from 'src/entities/clozecard';
 import { Inlinecard } from 'src/entities/inlinecard';
 import { Spacedcard } from 'src/entities/spacedcard';
@@ -491,6 +490,7 @@ export class Parser implements ParserProps {
           questionRaw: heading,
           answerRaw: content,
           headingLevelCount,
+          isReversed,
         });
 
       const tagsComposed = [
@@ -553,6 +553,7 @@ export class Parser implements ParserProps {
           questionRaw: inlineFirst,
           answerRaw: inlineSecond,
           headingLevelCount: false,
+          isReversed,
         });
 
       // apply inline-scoped settings
@@ -670,47 +671,54 @@ export class Parser implements ParserProps {
     answerRaw,
     headingLevelCount,
     startIndex,
+    isReversed = false,
   }: {
     id: number | null;
     questionRaw: string;
     answerRaw: string;
     headingLevelCount: number | false;
     startIndex: number;
+    isReversed?: boolean;
   }) {
-    let question = questionRaw.trim();
-
     const {
       contextHeadings,
       deck: deckName,
       tags: contextTags,
     } = this.getHeadingContext(startIndex, headingLevelCount);
 
-    // Remove current heading from context (since it could itself be the question)
+    const question = questionRaw.trim();
+    // FIXME: Remove current heading from context (since it could itself be the question)
     if (contextHeadings.length > 0 && contextHeadings[contextHeadings.length - 1] === question)
       contextHeadings.pop();
-    question = [...contextHeadings, question].join(
-      // FIXME: this really was a bad choice!
-      (this.settings.headingContextModeGlobal as { separator?: string })?.separator ??
-        (DEFAULT_SETTINGS.headingContextModeGlobal as { separator: string }).separator,
-    );
+
+    let headingContext: string = '';
+    if (this.settings.headingContextModeGlobal && contextHeadings.length > 0) {
+      headingContext = contextHeadings.join(this.settings.headingContextSeparator);
+    }
 
     // TODO: embed media was previously handled with a rather hacky document call:
     // Array.from(document.documentElement.getElementsByClassName('internal-embed'));
 
+    // eslint-disable-next-line prefer-const
+    let { cardContentWithEscapedMedia: contextHTML, mediaLinks: mediaLinksContext } =
+      this.substituteAndGetMediaLinks(headingContext);
     // eslint-disable-next-line prefer-const
     let { cardContentWithEscapedMedia: questionHTML, mediaLinks: mediaLinksQuestion } =
       this.substituteAndGetMediaLinks(question);
     // eslint-disable-next-line prefer-const
     let { cardContentWithEscapedMedia: answerHTML, mediaLinks: mediaLinksAnswer } =
       this.substituteAndGetMediaLinks(answerRaw.trim());
-    const mediaLinks = [...mediaLinksQuestion, ...mediaLinksAnswer];
+    const mediaLinks = [...mediaLinksQuestion, ...mediaLinksAnswer, ...mediaLinksContext];
 
-    questionHTML = await this.parseMarkdownLine(questionHTML);
-    answerHTML = await this.parseMarkdownLine(answerHTML);
+    contextHTML = await this.parseMarkdownLine(contextHTML, true);
+    questionHTML = await this.parseMarkdownLine(questionHTML, isReversed);
+    answerHTML = await this.parseMarkdownLine(answerHTML, isReversed);
 
-    // TODO: source support was removed - what was note?
-    // if (this.settings.sourceSupport) fields['Source'] = note;
-    const fields: AnkiFields = { Front: questionHTML, Back: answerHTML };
+    const fields: AnkiFields = {
+      Front: questionHTML,
+      Back: answerHTML,
+      Context: contextHTML,
+    };
 
     let sourceFieldContext: SourceFieldContext | undefined;
     if (this.settings.includeSourceLink) {
@@ -929,14 +937,15 @@ export class Parser implements ParserProps {
     };
   }
 
-  private async parseMarkdownLine(cardContent: string) {
+  private async parseMarkdownLine(cardContent: string, inline?: boolean) {
     // TODO: substituteEmbeddedExternalMediaLinks
     const substitutedNoteLinks = this.substituteNoteLinks(cardContent);
 
     const { cardContentSubstituted: minusMathJaxContent, mathJaxContentMap } =
       this.substituteMathJax(substitutedNoteLinks);
 
-    const html = (await marked.parse(minusMathJaxContent)).trimEnd();
+    const parse = inline ? marked.parseInline : marked.parse;
+    const html = (await parse(minusMathJaxContent))
 
     const htmlPlusMathJaxContent = this.reinsertMathJax(html, mathJaxContentMap);
     return htmlPlusMathJaxContent;
@@ -969,7 +978,7 @@ export class Parser implements ParserProps {
       }
 
       const referenceURI = encodeURIComponent(uniqueReference.path + (elementReference ?? ''));
-      const href = `obsidian://open?vault=${vaultNameURI}&file=${referenceURI}`;
+      const href = `obsidian://open?vault=${encodeURIComponent(vaultNameURI)}&amp;file=${referenceURI}`;
       let displayName = alt ? alt : uniqueReference.basename;
       if (embedded) displayName = '[' + displayName + ']';
 

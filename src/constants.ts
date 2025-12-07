@@ -12,9 +12,8 @@ export const DEFAULT_SETTINGS: Settings = {
   deckNameGlobal: 'Default',
   applyFrontmatterTagsGlobal: false,
   applyHeadingContextTagsGlobal: false,
-  headingContextModeGlobal: {
-    separator: ' > ',
-  },
+  headingContextModeGlobal: true,
+  headingContextSeparator: ' > ',
   transferMediaFiles: false,
   defaultAnkiTag: 'Obsidian',
   ankiTagsToPreserve: ['leech'],
@@ -32,32 +31,50 @@ export const ANKI_MEDIA_FOLDER_IMPORTS_PREFIX = '_obsidian-';
 export const CARD_TEMPLATES = {
   basic: {
     Front: dedent`
+      <div class="context">
+        {{Context}}
+      </div>
+
       {{Front}}
-      <p class="tags">{{Tags}}</p>
+
+      <div class="tags">{{Tags}}</div>
     `,
     Back: dedent`
       {{FrontSide}}
 
       <hr id="answer">
 
-      {{Back}}
+      <div>
+        {{Back}}
+      </div>
     `,
   },
   reversed: {
     Front: dedent`
+      <div class="context">
+        {{Context}}
+      </div>
+
       {{Back}}
-      <p class="tags">{{Tags}}</p>
+
+      <div class="tags">{{Tags}}</div>
     `,
     Back: dedent`
       {{FrontSide}}
 
       <hr id="answer">
 
-      {{Front}}
+      <div>
+        {{Front}}
+      </div>
     `,
   },
   cloze: {
     Front: dedent`
+      <div class="context">
+        {{Context}}
+      </div>
+
       {{cloze:Text}}
     `,
     Back: dedent`
@@ -70,8 +87,13 @@ export const CARD_TEMPLATES = {
   },
   memo: {
     Front: dedent`
+      <div class="context">
+        {{Context}}
+      </div>
+
       {{Prompt}}
-      <p class="tags">{{Tags}}</p>
+
+      <div class="tags">{{Tags}}</div>
     `,
     Back: dedent`
       {{FrontSide}}
@@ -84,7 +106,8 @@ export const CARD_TEMPLATES = {
 } as const;
 
 export const CARD_TEMPLATE_SOURCE_SUFFIX = dedent`
-<p class="source-section">
-  Source: {{Source}}
-</p>
+<details class="source-section">
+  <summary>Source</summary>
+  {{Source}}
+</details>
 `;

@@ -1,7 +1,13 @@
 import { CardInterface } from 'src/entities/card';
 import { ACStoreMediaFile } from './anki-connect';
 
-export type AnkiFields = { Front: string; Back: string; Source?: string };
+export type AnkiFields = {
+  Front: string;
+  Back: string;
+  Context: string;
+  Source?: string;
+};
+
 export type SourceFieldContext = {
   vaultName: string;
   filePath: string;

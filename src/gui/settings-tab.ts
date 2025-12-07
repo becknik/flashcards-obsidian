@@ -396,12 +396,10 @@ export class SettingsTab extends PluginSettingTab {
         .setName('Heading context separator')
         .setDesc('Separator to be added in between tow heading contexts')
         .addText((text) =>
-          text
-            .setValue((plugin.settings.headingContextModeGlobal as { separator: string }).separator)
-            .onChange(async (value) => {
-              (plugin.settings.headingContextModeGlobal as { separator: string }).separator = value;
-              await plugin.saveData(plugin.settings);
-            }),
+          text.setValue(plugin.settings.headingContextSeparator).onChange(async (value) => {
+            plugin.settings.headingContextSeparator = value;
+            await plugin.saveData(plugin.settings);
+          }),
         );
     }
 
@@ -484,7 +482,7 @@ export class ConfirmRerunOnRootModal extends Modal {
       onClose();
       closeCallbackExecuted = true;
       this.close();
-    }
+    };
 
     new Setting(this.contentEl).addButton((btn) =>
       btn

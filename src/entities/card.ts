@@ -82,18 +82,18 @@ export abstract class Card<T extends AnkiFields = AnkiFields> {
 
     // construct Source field if context is available
     if (this.sourceFieldContext) {
-      const vaultName = this.sourceFieldContext.vaultName;
-      const filePathEncoded = this.sourceFieldContext.filePath;
+      const vaultName = encodeURIComponent(this.sourceFieldContext.vaultName);
+      const filePathEncoded = encodeURIComponent(this.sourceFieldContext.filePath);
 
-      let source = `obsidian://open?vault=${vaultName}&file=${filePathEncoded}`;
+      let source = `obsidian://open?vault=${vaultName}&amp;file=${filePathEncoded}`;
       if (this.sourceFieldContext.noteId) {
-        source += `#^${this.sourceFieldContext.noteId}`;
+        source += encodeURIComponent(`#^${this.sourceFieldContext.noteId}`);
       }
 
       const fileWithEnding =
         this.sourceFieldContext.filePath.split('/').pop() || this.sourceFieldContext.filePath;
-      const fileName = encodeURIComponent(fileWithEnding.split('.').slice(0, -1).join('.'));
-      fields.Source = `<a href='${encodeURIComponent(source)}'>${fileName}</a>`;
+      const fileName = fileWithEnding.split('.').slice(0, -1).join('.');
+      fields.Source = `<a href='${source}'>${fileName}</a>`;
     }
 
     let ankiCard: AnkiCard<T> = {
